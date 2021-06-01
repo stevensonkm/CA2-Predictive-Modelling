@@ -17,10 +17,10 @@ head(covid_data, n = 5)
 class(covid_data)
 
 nrow(covid_data)
-#
-#
-#
-#
+# data preparation
+#choosing the variables and Africa continent
+#data cleaning
+# data processing
 
 
 covid_Africa <- subset.data.frame(covid_data,continent== 'Africa', select = c( new_cases, new_deaths, reproduction_rate,         
@@ -650,4 +650,4 @@ sigma(fit_model)/ mean(testing_data$new_cases)
 sigma(fit_model_sqrt)/ mean(testing_data$new_cases)
 
 head(actuals_predictions)
-summary(covid_Africa)
+
