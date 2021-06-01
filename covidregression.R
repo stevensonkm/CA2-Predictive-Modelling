@@ -517,19 +517,20 @@ detach(covid_Africa)
 
 
 
-# model fitting  
+ 
 
 
 attach(covid_Africa)
-mlr_model <- lm(new_cases ~  total_vaccinations + new_deaths + female_smokers +
+model1 <- lm(new_cases ~  total_vaccinations + new_deaths + female_smokers +
                   + total_tests + aged_70_older + aged_65_older  +
                   population + new_tests,  
                 data = covid_Africa)
 
 
-summary(mlr_model)
+summary(model1)
 
-
+# regression model with 70% of training data and 30% of testing data
+# testing for outliers 
 set.seed(1)
 no_rows_data <- nrow(covid_Africa)
 my_sample <- sample(1:no_rows_data, size = round(0.7 * no_rows_data), replace =FALSE)
@@ -540,9 +541,15 @@ testing_data <- covid_Africa[-my_sample, ]
 model_fit <- lm(new_cases ~  total_vaccinations + male_smokers + female_smokers 
                 + total_tests + aged_70_older + aged_65_older +
                   population,    data = training_data)
+
+# showing the summary of the model
+
 summary(model_fit)
+
+# analyzing the confidence interval of the model
 confint(model_fit)
 
+# installing ggplot 
 
 library(ggplot2)
 library(car)
@@ -553,10 +560,17 @@ qqPlot(model_fit, labels=row.names(location),
 training_data[70124,]                                                            
 training_data[70118,]                                                            
 
+#outlier.test(model_fit)
+
+outlierTest(model_fit)
+
 
 fitted(model_fit)[70124]                                                               
 fitted(model_fit)[70118]
-covid_Africa <- covid_Africa[!(row.names(covid_Africa) %in% c("70120", "70117,", "70119","70111","5189","5184","51873", "51870", "7118","7125")),]
+
+# removing the outliers
+
+covid_Africa <- covid_Africa[!(row.names(covid_Africa) %in% c("70117 ", "70118 ", "70124 ","70125 ","70110 ","70121 ","70112 ", "69936 ", "69951 ","69946 ")),]
 
 attach(covid_Africa)
 
@@ -574,6 +588,10 @@ model_fit <- lm(new_cases ~  male_smokers + female_smokers
                 data = training_data)
 outlierTest(model_fit)
 
+covid_Africa <- covid_Africa[!(row.names(covid_Africa) %in% c("70117 ", "70118 ", "70124 ","70125 ","70110 ","70121 ","70112 ", "69936 ", "69951 ","69946 ")),]
+
+
+# histogram of the studentized residuals and superimposes a normal curve, kernel-density curve, and rug plot
 student_fit <- rstudent(model_fit)
 hist(student_fit,
      breaks=10,
@@ -585,9 +603,11 @@ curve(dnorm(x, mean=mean(student_fit), sd=sd(student_fit)), add=TRUE,col="blue",
 lines(density(student_fit)$x, density(student_fit)$y, col="red", lwd=2, lty=2)
 legend("topright", legend = c( "Normal Curve", "Kernel Density Curve"), lty=1:2, col=c("blue","red"), cex=.7)
 
+# car library for  visualization 
 library(car)
 crPlots(model_fit)
 cutoff <- 4/(nrow(training_data) - length(model_fit$coefficients) - 2)
+# plotting the graph
 plot(model_fit, which = 4, cook.levels = cutoff)
 abline(h = cutoff, lty = 2, col = "red")
 avPlots(model_fit, ask=FALSE)                                                         
@@ -595,21 +615,22 @@ influencePlot(model_fit, main="Influence Plot",
               sub="Circle size is proportional to Cook's distance")              
 ncvTest(model_fit)
 
-#
-#
+#spreadLevelPlot(fit)
+
 spreadLevelPlot(model_fit)
+
 #install.packages("gvlma")
 library(gvlma) 
 library(mice) 
 gvmodel <- gvlma(model_fit)  
 summary(gvmodel)
-#
-#
+
+# install car library
 library(car)
 vif(model_fit)
 sqrt(vif(model_fit)) > 2
-#
-#
+# model prediction 
+
 fit_model <- lm(new_cases ~  male_smokers + female_smokers 
                 + total_tests + aged_70_older + aged_65_older, data= testing_data)
 fit_model_sqrt <- lm(new_cases ~  male_smokers + female_smokers 
@@ -618,11 +639,11 @@ predicted_cases <- predict(fit_model, testing_data)
 predicted_cases_sqrt <- predict(fit_model_sqrt, testing_data)
 converted_cases_sqrt <- predicted_cases_sqrt ^2
 
-#
+# for prediction of fit 
 actuals_predictions <- data.frame(cbind(actuals = testing_data$new_cases, predicted = predicted_cases))
 head(actuals_predictions,100)
 
-#
+# for prediction of sqrt fit
 actuals_predictions_sqrt <- data.frame(cbind(actuals = testing_data$new_cases, predicted = predicted_cases_sqrt))
 head(actuals_predictions_sqrt,100)
 
