@@ -229,11 +229,11 @@ covid_Africa <- subset(covid_Africa, select = -c(population_density, stringency_
 head(covid_Africa)
 str(covid_Africa)
 
-# Now we check for outliners
+# Now we check for outliers
 # install.packages("e1071")
 library(e1071)
 attach(covid_Africa)
-
+# using boxplot
 opar <- par(no.readonly = TRUE)
 par(mfrow = c(2, 3))    # divide graph area in 3 rows by 2 columns
 
@@ -671,4 +671,5 @@ sigma(fit_model)/ mean(testing_data$new_cases)
 sigma(fit_model_sqrt)/ mean(testing_data$new_cases)
 
 head(actuals_predictions)
+summary(covid_Africa)
 
