@@ -622,6 +622,13 @@ vif(model_fit)
 sqrt(vif(model_fit)) > 2
 #
 #
+#
+
+
+
+
+#
+#
 fit_model <- lm(new_cases ~  male_smokers + female_smokers 
                 + total_tests + aged_70_older + aged_65_older, data= testing_data)
 fit_model_sqrt <- lm(new_cases ~  male_smokers + female_smokers 
@@ -664,3 +671,21 @@ sigma(fit_model_sqrt)/ mean(testing_data$new_cases)
 #
 head(actuals_predictions)
 summary(covid_Africa)
+#
+#
+#
+#
+attach (covid_Africa)
+summary(covid_Africa)
+
+new_data <- data.frame(data.frame(aged_65_older = c(10) , aged_70_older= c(5), male_smokers= c(65), female_smokers= c(9), new_tests= c(74830) ))
+                
+                  
+cases_prediction <- predict(fit_model, new_data)
+cases_prediction
+
+new_data1 <- data.frame(data.frame(aged_65_older = c(10) , aged_70_older= c(5), male_smokers= c(65), female_smokers= c(9), new_tests= c(74830) ))
+
+predicted_new_cases <- predict(fit_model_sqrt, new_data1)
+predicted_new_cases
+
