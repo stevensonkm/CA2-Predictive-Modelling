@@ -1,5 +1,4 @@
 # load the dataset "covid.csv"
-detach(covid_Africa)
 
 covid_data <- read.csv("covid.csv", na = "", header = T, stringsAsFactors = T)  
 covid_data [covid_data == ""] <- NA 
@@ -18,7 +17,6 @@ head(covid_data, n = 5)
 class(covid_data)
 
 nrow(covid_data)
-detach(covid_Africa)
 #
 #
 #
@@ -37,10 +35,6 @@ covid_Africa <- subset.data.frame(covid_data,continent== 'Africa', select = c( n
 str(covid_Africa)
 names(covid_Africa)
 attach(covid_Africa)
-library(VIM)
-missing_values <- aggr(covid_Africa, prop = FALSE, numbers = TRUE)
-summary(missing_values)
-names(which(sapply(covid_Africa, anyNA)))
 
 # check the missing values using vim library
 library(VIM)
@@ -76,45 +70,37 @@ covid_Africa$handwashing_facilities[is.na(handwashing_facilities)] <- 0
 covid_Africa$human_development_index [is.na(human_development_index )] <- 0
 
 
-
 #identify the missing values using vim
 any(is.na(covid_Africa))
 covid_Africa <- na.omit(covid_Africa)
 missing_values <- aggr(covid_Africa, prop = FALSE, numbers = TRUE)             
 summary(missing_values) 
 
-#
 
 
 
-
-covid_Africa <- na.omit(covid_Africa)
-missing_values <- aggr(covid_Africa, prop = FALSE, numbers = TRUE)
-summary(covid_Africa)
-
-
-
-detach(covid)
+attach(covid_Africa)
 # checking correlation
 library(psych)                                                                  
-pdf('pairs.pdf')
-pairs(covid_Africa)
-pairs.panels(covid_Africa, 
-             smooth = TRUE, # If TRUE, draws loess smooths  
-             scale = FALSE, # If TRUE, scales the correlation text font  
-             density = TRUE, # If TRUE, adds density plots and histograms  
-             ellipses = TRUE, # If TRUE, draws ellipses   
-             method = "spearman",# Correlation method (also "pearson" or "kendall") 
-             pch = 21, # pch symbol   
-             lm = FALSE, # If TRUE, plots linear fit rather than the LOESS (smoothed) fit 
-             cor = TRUE, # If TRUE, reports correlations
-             jiggle = FALSE, # If TRUE, data points are jittered  
-             factor = 2, # Jittering factor  
-             hist.col = 4, # Histograms color   
-             stars = TRUE,
-             ci = TRUE) # If TRUE, adds confidence intervals 
+#pdf('pairs.pdf')
+#pairs(covid_Africa)
+#pairs.panels(covid_Africa, 
+#             smooth = TRUE, # If TRUE, draws loess smooths  
+#             scale = FALSE, # If TRUE, scales the correlation text font  
+#             density = TRUE, # If TRUE, adds density plots and histograms  
+#             ellipses = TRUE, # If TRUE, draws ellipses   
+#             method = "spearman",# Correlation method (also "pearson" or "kendall") 
+#             pch = 21, # pch symbol   
+#             lm = FALSE, # If TRUE, plots linear fit rather than the LOESS (smoothed) fit 
+#             cor = TRUE, # If TRUE, reports correlations
+#             jiggle = FALSE, # If TRUE, data points are jittered  
+#             factor = 2, # Jittering factor  
+#             hist.col = 4, # Histograms color   
+#             stars = TRUE,
+#             ci = TRUE) # If TRUE, adds confidence intervals 
 
-dev.off()
+# dev.off()
+
 # correlation between variables
 scatter.smooth(x = covid_Africa$new_cases,                                       
                y = covid_Africa$new_deaths,                                     
@@ -244,7 +230,7 @@ head(covid_Africa)
 str(covid_Africa)
 
 # Now we check for outliners
-install.packages("e1071")
+# install.packages("e1071")
 library(e1071)
 attach(covid_Africa)
 
@@ -426,6 +412,7 @@ paste("Skewness for new_tests: ", round(e1071::skewness(new_tests), 2))         
 opar <- par(no.readonly = TRUE)
 par(mfrow = c(1,2)) # divide the graph area in 2 cols
 
+# NEW CASES
 hist(new_cases, 
      main = "Normalility proportion of New cases", 
      xlab = "New Cases")
@@ -433,20 +420,21 @@ hist(new_cases,
 qqnorm(new_cases)
 qqline(new_cases, col = "red")
 
+# NEW DEATHS
 hist(new_deaths, 
      main = "Normalility proportion of New Deaths", 
      xlab = "New Deaths")
 
 qqnorm(new_deaths)
 qqline(new_deaths, col = "red")
-#
+# STRINGENCY INDEX
 hist(stringency_index, 
      main = "Normalility proportion of stringency_index", 
      xlab = "stringency_index")
 
 qqnorm(stringency_index)
 qqline(stringency_index, col = "red")
-#
+# POPULATION
 hist(population, 
      main = "Normalility proportion of population", 
      xlab = "population")
@@ -622,13 +610,6 @@ vif(model_fit)
 sqrt(vif(model_fit)) > 2
 #
 #
-#
-
-
-
-
-#
-#
 fit_model <- lm(new_cases ~  male_smokers + female_smokers 
                 + total_tests + aged_70_older + aged_65_older, data= testing_data)
 fit_model_sqrt <- lm(new_cases ~  male_smokers + female_smokers 
@@ -645,11 +626,11 @@ head(actuals_predictions,100)
 actuals_predictions_sqrt <- data.frame(cbind(actuals = testing_data$new_cases, predicted = predicted_cases_sqrt))
 head(actuals_predictions_sqrt,100)
 
-# correlation accuracy
+# checking the correlation accuracy
 correlation_accuracy <- cor(actuals_predictions)
 correlation_accuracy
 
-# correlation accuracy_sqrt
+# checking the correlation accuracy_sqrt
 correlation_accuracy_sqrt <- cor(actuals_predictions_sqrt)
 correlation_accuracy_sqrt
 # Min - max accuracy
@@ -657,35 +638,16 @@ min_max_accuracy <- mean(apply(actuals_predictions, 1, min) / apply(actuals_pred
 min_max_accuracy
 
 
-# Min - max accuracy
+# check the Min - max accuracy
 min_max_accuracy <- mean(apply(actuals_predictions_sqrt, 1, min) / apply(actuals_predictions_sqrt, 1, max))
 min_max_accuracy
 
 
-# Residual Standard Error (RSE), or sigma
+# checking the Residual Standard Error (RSE), or sigma
 sigma(fit_model)/ mean(testing_data$new_cases)
 
-# Residual Standard Error (RSE), or sigma for transformed variable
+# checking Residual Standard Error (RSE), or sigma for transformed variable
 sigma(fit_model_sqrt)/ mean(testing_data$new_cases)
 
-#
 head(actuals_predictions)
 summary(covid_Africa)
-#
-#
-#
-#
-attach (covid_Africa)
-summary(covid_Africa)
-
-new_data <- data.frame(data.frame(aged_65_older = c(10) , aged_70_older= c(5), male_smokers= c(65), female_smokers= c(9), new_tests= c(74830) ))
-                
-                  
-cases_prediction <- predict(fit_model, new_data)
-cases_prediction
-
-new_data1 <- data.frame(data.frame(aged_65_older = c(10) , aged_70_older= c(5), male_smokers= c(65), female_smokers= c(9), new_tests= c(74830) ))
-
-predicted_new_cases <- predict(fit_model_sqrt, new_data1)
-predicted_new_cases
-
