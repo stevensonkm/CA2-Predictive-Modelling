@@ -21,6 +21,7 @@ nrow(covid_data)
 #choosing the variables and Africa continent
 #data cleaning
 # data processing
+detach(covid_Africa)
 
 
 covid_Africa <- subset.data.frame(covid_data,continent== 'Africa', select = c( new_cases, new_deaths, reproduction_rate,         
@@ -100,6 +101,9 @@ library(psych)
 #             ci = TRUE) # If TRUE, adds confidence intervals 
 
 # dev.off()
+opar <- par(no.readonly = TRUE)
+
+par(mfrow = c(1,1 ))
 
 # correlation between variables
 scatter.smooth(x = covid_Africa$new_cases,                                       
@@ -225,7 +229,7 @@ cor(covid_Africa$new_cases, covid_Africa$handwashing_facilities)  # corr=0.15532
 # so we remove these variables
 covid_Africa <- subset(covid_Africa, select = -c( diabetes_prevalence, gdp_per_capita ))
 covid_Africa <- subset(covid_Africa, select = -c(extreme_poverty        ))
-covid_Africa <- subset(covid_Africa, select = -c(population_density, stringency_index, ) )                       
+covid_Africa <- subset(covid_Africa, select = -c(population_density, stringency_index ) )                       
 head(covid_Africa)
 str(covid_Africa)
 
@@ -403,7 +407,7 @@ paste("Skewness for male_smokers: ", round(e1071::skewness(male_smokers), 2))   
 paste("Skewness for median_age: ", round(e1071::skewness(median_age), 2))                           #1.34
 paste("Skewness for handwashing_facilities: ", round(e1071::skewness(handwashing_facilities), 2))   #1.42
 paste("Skewness for new_tests: ", round(e1071::skewness(new_tests), 2))                             # 6.82
-
+paste("Skewness for new_tests: ", round(e1071::skewness(total_tests), 2)) 
 
 # showing the visual analysis by histogram
 # showing the data is normally distributed or not 
@@ -508,27 +512,13 @@ qqline(total_tests, col = "red")
 
 
 par <- opar
+opar <- par(no.readonly = TRUE)
+par(mfrow = c(1, 1))
 
 summary(covid_Africa)
 
 covid_Africa <- covid_Africa[is.finite(rowSums(covid_Africa)),]
 detach(covid_Africa)
-
-
-
-
- 
-
-
-attach(covid_Africa)
-model1 <- lm(new_cases ~  total_vaccinations + new_deaths + female_smokers +
-                  + total_tests + aged_70_older + aged_65_older  +
-                  population + new_tests,  
-                data = covid_Africa)
-
-
-summary(model1)
-
 # regression model with 70% of training data and 30% of testing data
 # testing for outliers 
 set.seed(1)
@@ -539,7 +529,7 @@ training_data <- covid_Africa[my_sample,]
 testing_data <- covid_Africa[-my_sample, ]
 
 model_fit <- lm(new_cases ~  total_vaccinations + male_smokers + female_smokers 
-                + total_tests + aged_70_older + aged_65_older +
+                + total_tests + new_deaths + new_tests +
                   population,    data = training_data)
 
 # showing the summary of the model
@@ -584,7 +574,7 @@ training_data <- covid_Africa[my_sample, ]
 testing_data <- covid_Africa[-my_sample, ]
 
 model_fit <- lm(new_cases ~  male_smokers + female_smokers 
-                + total_tests + aged_70_older + aged_65_older + total_vaccinations,
+                + total_tests + new_tests + new_deaths + total_vaccinations,
                 data = training_data)
 outlierTest(model_fit)
 
@@ -641,11 +631,11 @@ converted_cases_sqrt <- predicted_cases_sqrt ^2
 
 # for prediction of fit 
 actuals_predictions <- data.frame(cbind(actuals = testing_data$new_cases, predicted = predicted_cases))
-head(actuals_predictions,100)
+head(actuals_predictions,)
 
 # for prediction of sqrt fit
 actuals_predictions_sqrt <- data.frame(cbind(actuals = testing_data$new_cases, predicted = predicted_cases_sqrt))
-head(actuals_predictions_sqrt,100)
+head(actuals_predictions_sqrt,)
 
 # checking the correlation accuracy
 correlation_accuracy <- cor(actuals_predictions)
